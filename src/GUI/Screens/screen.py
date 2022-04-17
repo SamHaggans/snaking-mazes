@@ -1,19 +1,10 @@
-from abc import ABC, abstractmethod
+from PyQt6.QtWidgets import QWidget
 
 
-class Screen(ABC):
+class Screen(QWidget):
     """
     Base class for GUI screens
     """
 
-    @abstractmethod
     def __init__(self):
-        pass
-
-    @abstractmethod
-    def render(self):
-        pass
-
-    @abstractmethod
-    def cleanup(self):
-        pass
+        super().__init__()

@@ -3,7 +3,8 @@ from .screen import Screen
 
 class BuildScreen(Screen):
     def __init__(self):
-        self.title = "Build"
+        super().__init__()
+        pass
 
     def render(self):
         pass
