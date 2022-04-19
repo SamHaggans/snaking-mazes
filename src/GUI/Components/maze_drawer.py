@@ -10,11 +10,14 @@ class MazeDrawer(QWidget):
         super().__init__()
         self.show()
         self.maze = None
+        self.left_pressed = False
+        self.right_pressed = False
 
     def paintEvent(self, event):
         if not self.maze:
             return
-        grid_dim = math.floor(min(self.width(), self.height()) / self.maze.dim)
+        self.grid_dim = math.floor(min(self.width(), self.height()) / self.maze.dim)
+        grid_dim = self.grid_dim
         self.painter = QPainter()
         self.painter.begin(self)
         for i in range(self.maze.dim):
@@ -36,7 +39,11 @@ class MazeDrawer(QWidget):
         )
 
         # End of maze
-        self.painter.setPen(QPen(Qt.GlobalColor.red, 5))
+
+        # Pen width 5 looks good for a 20x20 maze
+        # Scale the width down as the dimension increases
+        pen_width = 5 * (20 / self.maze.dim)
+        self.painter.setPen(QPen(Qt.GlobalColor.red, pen_width))
         self.painter.drawLine(
             (self.maze.end[0] + 0 + 0.2) * grid_dim,
             (self.maze.end[1] + 0 + 0.2) * grid_dim,
@@ -57,4 +64,34 @@ class MazeDrawer(QWidget):
 
     def set_maze(self, maze):
         self.maze = maze
+        self.update()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.set_grid(event.position().x(), event.position().y(), 1)
+            self.left_pressed = True
+        elif event.button() == Qt.MouseButton.RightButton:
+            self.set_grid(event.position().x(), event.position().y(), 0)
+            self.right_pressed = True
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.left_pressed = False
+        elif event.button() == Qt.MouseButton.RightButton:
+            self.right_pressed = False
+
+    def mouseMoveEvent(self, event):
+        if self.left_pressed:
+            self.set_grid(event.position().x(), event.position().y(), 1)
+        elif self.right_pressed:
+            self.set_grid(event.position().x(), event.position().y(), 0)
+
+    def set_grid(self, x, y, val):
+        if not self.maze:
+            return
+        row = int(x // self.grid_dim)
+        col = int(y // self.grid_dim)
+        if row < 0 or row >= self.maze.dim or col < 0 or col >= self.maze.dim:
+            return
+        self.maze.grid[row][col] = val
         self.update()

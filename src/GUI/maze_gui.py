@@ -58,23 +58,31 @@ class MazeGUI(QMainWindow):
 
         self.screen_history.appendleft(screen_name)
 
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
+    def update(self):
+        super().update()
         self.header.resize(self.width(), self.height() * 0.15)
         self.active_widget.resize(self.width(), self.height() * 0.85)
 
+    def resizeEvent(self, event):
+        self.update()
+
     def home_pressed(self):
         self.set_active_screen("home")
+        self.update()
 
     def back_pressed(self):
         self.screen_history.popleft()
         self.set_active_screen(self.screen_history[-1])
+        self.update()
 
     def build_pressed(self):
         self.set_active_screen("build")
+        self.update()
 
     def play_pressed(self):
         self.set_active_screen("play")
+        self.update()
 
     def share_pressed(self):
         self.set_active_screen("share")
+        self.update()
