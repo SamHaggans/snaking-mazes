@@ -56,6 +56,25 @@ class PlayControl(QWidget):
         self.animate_solve_button.setFixedSize(150, 40)
         self.animate_solve_button.setEnabled(False)
 
+        self.elapsed_time = 0.0
+        self.play_timer_label = QLabel("0.0")
+        self.play_timer_label.setFont(font)
+
+        self.play_timer = QTimer()
+        self.play_timer.timeout.connect(self.update_time)
+
+        self.play_timer_enabled = False
+        self.play_button = QPushButton("Start Play Timer")
+        self.play_button.pressed.connect(self.toggle_play_timer)
+        self.play_button.setFixedSize(150, 40)
+        self.play_button.setEnabled(False)
+
+        self.reset_play_button = QPushButton("Reset Play Timer")
+        self.reset_play_button.pressed.connect(self.clear_timer)
+        self.reset_play_button.setFixedSize(150, 40)
+
+        self.maze_drawer.set_draw_end_func(self.stop_play_timer)
+
         self.maze_list = QComboBox()
         self.maze_list.addItems(Maze.saved_mazes.keys())
 
@@ -64,6 +83,9 @@ class PlayControl(QWidget):
         layout.addWidget(self.load_selected_button)
         layout.addWidget(self.clear_maze_button)
         layout.addWidget(self.animate_solve_button)
+        layout.addWidget(self.play_timer_label)
+        layout.addWidget(self.play_button)
+        layout.addWidget(self.reset_play_button)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.setLayout(layout)
 
@@ -75,12 +97,39 @@ class PlayControl(QWidget):
             return
         self.clear_maze_button.setEnabled(True)
         self.animate_solve_button.setEnabled(True)
+        self.play_button.setEnabled(True)
         self.maze_name_label.setText(self.maze.name)
         if self.maze.name in Maze.saved_mazes:
             self.maze_list.setCurrentText(self.maze.name)
         self.maze_name_label.setFixedWidth(self.width())
         self.maze_drawer.repaint()
         self.maze_drawer.update()
+
+    def clear_timer(self):
+        if self.play_timer_enabled:
+            self.toggle_play_timer()
+        self.elapsed_time = 0.0
+        self.play_timer_label.setText(str(self.elapsed_time))
+
+    def stop_play_timer(self):
+        if self.play_timer_enabled:
+            self.toggle_play_timer()
+
+    def toggle_play_timer(self):
+        if not self.play_timer_enabled:
+            self.play_button.setText("Stop Timer")
+            self.elapsed_time = 0.0
+            self.play_timer_label.setText(str(self.elapsed_time))
+            self.play_timer.start(100)
+        else:
+            self.play_button.setText("Start Timer")
+            self.play_timer.stop()
+        self.play_timer_enabled = not self.play_timer_enabled
+
+    def update_time(self):
+        self.elapsed_time += 0.1
+        self.elapsed_time = round(self.elapsed_time, 1)
+        self.play_timer_label.setText(str(self.elapsed_time))
 
     def load_selected_maze(self):
         if len(Maze.saved_mazes) == 0:

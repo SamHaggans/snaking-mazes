@@ -15,6 +15,10 @@ class MazeDrawer(QWidget):
         # mode 0 = build
         # mode 1 = play
         self.mode = 0
+        self.draw_end_func = None
+
+    def set_draw_end_func(self, func):
+        self.draw_end_func = func
 
     def paintEvent(self, event):
         if not self.maze:
@@ -116,6 +120,8 @@ class MazeDrawer(QWidget):
             self.maze.grid[row][col] = val
             if (row, col) == self.maze.end and self.mode == 1:
                 self.update()
+                if self.draw_end_func:
+                    self.draw_end_func()
                 self.make_popup("You win!")
         self.update()
 
