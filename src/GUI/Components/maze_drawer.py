@@ -2,7 +2,7 @@ import math
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPainter, QPen
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QMessageBox, QWidget
 
 
 class MazeDrawer(QWidget):
@@ -12,10 +12,15 @@ class MazeDrawer(QWidget):
         self.maze = None
         self.left_pressed = False
         self.right_pressed = False
+        # mode 0 = build
+        # mode 1 = play
+        self.mode = 0
 
     def paintEvent(self, event):
         if not self.maze:
             return
+        if self.mode == 1:
+            self.maze.grid[self.maze.start[0]][self.maze.start[1]] = 2
         self.grid_dim = math.floor(min(self.width(), self.height()) / self.maze.dim)
         grid_dim = self.grid_dim
         self.painter = QPainter()
@@ -68,7 +73,9 @@ class MazeDrawer(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            self.set_grid(event.position().x(), event.position().y(), 1)
+            self.set_grid(
+                event.position().x(), event.position().y(), 1 if self.mode == 0 else 2
+            )
             self.left_pressed = True
         elif event.button() == Qt.MouseButton.RightButton:
             self.set_grid(event.position().x(), event.position().y(), 0)
@@ -82,7 +89,9 @@ class MazeDrawer(QWidget):
 
     def mouseMoveEvent(self, event):
         if self.left_pressed:
-            self.set_grid(event.position().x(), event.position().y(), 1)
+            self.set_grid(
+                event.position().x(), event.position().y(), 1 if self.mode == 0 else 2
+            )
         elif self.right_pressed:
             self.set_grid(event.position().x(), event.position().y(), 0)
 
@@ -93,5 +102,28 @@ class MazeDrawer(QWidget):
         col = int(y // self.grid_dim)
         if row < 0 or row >= self.maze.dim or col < 0 or col >= self.maze.dim:
             return
-        self.maze.grid[row][col] = val
+        can_place = True
+        if self.mode == 1 and self.maze.grid[row][col] == 1:
+            return
+        if val == 2:
+            neighbors = self.maze.get_neighbors(row, col)
+            can_place = False
+            for neighbor in neighbors:
+                if self.maze.grid[neighbor[0]][neighbor[1]] == 2:
+                    can_place = True
+                    break
+        if can_place:
+            self.maze.grid[row][col] = val
+            if (row, col) == self.maze.end and self.mode == 1:
+                self.update()
+                self.make_popup("You win!")
         self.update()
+
+    def make_popup(self, message):
+        popup = QMessageBox(self)
+        popup.setWindowTitle("Alert")
+        popup.setText(message)
+        ack = popup.exec()
+
+        if ack:
+            return

@@ -73,7 +73,7 @@ class EditControl(QWidget):
         self.maze_name_edit = QLineEdit()
         self.maze_name_edit.setPlaceholderText("Enter Maze Name")
         self.maze_name_edit.textEdited.connect(self.maze_name_change)
-        self.difficulty_dial.setEnabled(False)
+        self.maze_name_edit.setEnabled(False)
 
         layout.addWidget(self.maze_list)
         layout.addWidget(self.random_button)
@@ -88,6 +88,8 @@ class EditControl(QWidget):
         self.setLayout(layout)
 
     def update(self):
+        self.maze_list.clear()
+        self.maze_list.addItems(Maze.saved_mazes.keys())
         if not self.maze:
             return
         self.save_maze_button.setEnabled(True)
@@ -105,12 +107,15 @@ class EditControl(QWidget):
         )
         self.maze_name_edit.setText(self.maze.name)
         self.dimension_spin.setValue(self.maze.dim)
-        self.maze_list.clear()
-        self.maze_list.addItems(Maze.saved_mazes.keys())
+        if self.maze.name in Maze.saved_mazes:
+            self.maze_list.setCurrentText(self.maze.name)
         self.maze_drawer.update()
 
     def save_maze(self):
         if not self.maze:
+            return
+        if not self.maze.route_astar(self.maze.start, self.maze.end, search_path=True):
+            self.make_popup("That maze is not solvable!")
             return
         if self.maze_changed:
             if self.maze.name in Maze.saved_mazes:
@@ -131,6 +136,10 @@ class EditControl(QWidget):
             self.maze = Maze.get_saved_maze(maze_selected)
             self.maze_changed = False
             self.maze_drawer.set_maze(self.maze)
+            self.difficulty_text.setText(
+                f"Difficulty: {self.difficulty_options[self.maze.difficulty]}"
+            )
+            self.difficulty_dial.setValue(self.maze.difficulty)
             self.update()
 
     def randomize_maze(self):

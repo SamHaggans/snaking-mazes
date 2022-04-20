@@ -75,11 +75,11 @@ class Maze:
 
             sorted_dist = sorted(neighbors, key=lambda val: distance(val, self.end))
             if self.difficulty == 0:
-                threshold = 0.7
+                threshold = 0.6
             elif self.difficulty == 1:
                 threshold = 0.5
             else:
-                threshold = 0.3
+                threshold = 0.4
             rd = random.random()
             if rd < threshold or len(sorted_dist) == 1:
                 current = sorted_dist[0]
@@ -133,7 +133,7 @@ class Maze:
         self.dim = new_dim
         self.end = (self.dim - 1, self.dim - 1)
 
-    def route_astar(self, src, dest):
+    def route_astar(self, src, dest, search_path=False):
         src = tuple(src)
         dest = tuple(dest)
         nodes = set()
@@ -151,10 +151,13 @@ class Maze:
                 return True
 
             nodes.remove(current)
-
-            for neighbor in self.get_neighbors(
-                current[0], current[1], exclude_path=True
-            ):
+            if not search_path:
+                neighbors = self.get_neighbors(
+                    current[0], current[1], exclude_path=True
+                )
+            else:
+                neighbors = self.get_neighbors(current[0], current[1], only_path=True)
+            for neighbor in neighbors:
                 neighbor = tuple(neighbor)
                 route_score = g_score[current] + 1
                 if neighbor not in g_score or route_score < g_score[neighbor]:
@@ -165,7 +168,7 @@ class Maze:
                         nodes.add(neighbor)
         return False
 
-    def get_neighbors(self, row, col, exclude_path=False):
+    def get_neighbors(self, row, col, exclude_path=False, only_path=False):
         neighbors = set()
         # 4 possible movements (no diagonals)
         delta = ((-1, 0), (0, -1), (0, 1), (1, 0))
@@ -177,7 +180,8 @@ class Maze:
                 and col + d[1] < self.dim
                 and col + d[1] >= 0
             ):
-                neighbors.add((row + d[0], col + d[1]))
+                if not (only_path and self.grid[row + d[0]][col + d[1]] == 1):
+                    neighbors.add((row + d[0], col + d[1]))
 
         if exclude_path:
             actual_neighbors = set()
