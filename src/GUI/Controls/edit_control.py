@@ -88,6 +88,15 @@ class EditControl(QWidget):
         self.help_button.pressed.connect(self.show_help)
         self.help_button.setFixedSize(150, 40)
 
+        self.place_start_button = QPushButton("Move Start")
+        self.place_start_button.pressed.connect(self.place_start)
+        self.place_start_button.setFixedSize(150, 40)
+        self.place_start_button.setEnabled(False)
+        self.place_end_button = QPushButton("Move End")
+        self.place_end_button.pressed.connect(self.place_end)
+        self.place_end_button.setFixedSize(150, 40)
+        self.place_end_button.setEnabled(False)
+
         layout.addWidget(self.maze_name_label)
         layout.addWidget(self.maze_name_edit)
         layout.addWidget(self.maze_list)
@@ -99,9 +108,17 @@ class EditControl(QWidget):
         layout.addWidget(self.dimension_spin)
         layout.addWidget(self.difficulty_text)
         layout.addWidget(self.difficulty_dial)
+        layout.addWidget(self.place_start_button)
+        layout.addWidget(self.place_end_button)
         layout.addWidget(self.help_button)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.setLayout(layout)
+
+    def place_start(self):
+        self.maze_drawer.place_start = True
+
+    def place_end(self):
+        self.maze_drawer.place_end = True
 
     def update(self):
         self.maze_list.clear()
@@ -114,6 +131,8 @@ class EditControl(QWidget):
         self.difficulty_dial.setEnabled(True)
         self.maze_name_edit.setEnabled(True)
         self.random_button.setEnabled(True)
+        self.place_start_button.setEnabled(True)
+        self.place_end_button.setEnabled(True)
         self.save_maze_button.show()
 
         self.save_maze_button.setText(
@@ -207,6 +226,8 @@ class EditControl(QWidget):
             "difficulties\n"
             "Dragging/clicking the left mouse button places black borders on the maze\n"
             "Dragging/clicking the right mouse button places path tiles on the maze\n"
+            "Move the start/end of the maze by clicking the appropriate button "
+            "and then clicking on a valid start/ending tile\n"
         )
         self.make_popup(help_message, title="Help")
 

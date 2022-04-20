@@ -16,6 +16,8 @@ class MazeDrawer(QWidget):
         # mode 1 = play
         self.mode = 0
         self.draw_end_func = None
+        self.place_start = False
+        self.place_end = False
 
     def set_draw_end_func(self, func):
         self.draw_end_func = func
@@ -113,6 +115,25 @@ class MazeDrawer(QWidget):
         can_place = True
         if self.mode == 1 and self.maze.grid[row][col] == 1:
             return
+
+        if self.place_start:
+            if self.maze.grid[row][col] == 0:
+                self.maze.start = (row, col)
+                self.place_start = False
+                self.update()
+            self.left_pressed = False
+            self.right_pressed = False
+            return
+
+        if self.place_end:
+            if self.maze.grid[row][col] == 0:
+                self.maze.end = (row, col)
+                self.place_end = False
+                self.update()
+            self.left_pressed = False
+            self.right_pressed = False
+            return
+
         if val == 2:
             neighbors = self.maze.get_neighbors(row, col)
             can_place = False

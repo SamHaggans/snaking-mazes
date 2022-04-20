@@ -14,7 +14,7 @@ class MazeGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Snaking Mazes")
-        self.setMinimumSize(1000, 700)
+        self.setMinimumSize(1000, 750)
         self.main_widget = QWidget(self)
         self.setCentralWidget(self.main_widget)
         self.layout = QVBoxLayout()
