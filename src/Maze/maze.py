@@ -5,10 +5,8 @@ import pickle
 import random
 from collections import deque
 
-abspath = os.path.abspath(__file__)
-relpath = os.path.relpath(__file__)
-
-MAZE_SAVE_PATH = os.path.join(abspath.replace(relpath, ""), ".saved_mazes")
+HOME_DIR = os.path.expanduser("~")
+MAZE_SAVE_PATH = os.path.join(HOME_DIR, ".saved_mazes")
 if not os.path.isdir(MAZE_SAVE_PATH):
     try:
         os.mkdir(MAZE_SAVE_PATH)
