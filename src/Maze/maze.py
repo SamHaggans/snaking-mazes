@@ -69,6 +69,8 @@ class Maze:
                     for neighbor in neighbors
                     if self.route_astar(neighbor, self.end)
                 ]
+                if len(neighbors) == 0:
+                    return
                 current = neighbors[0]
 
             sorted_dist = sorted(neighbors, key=lambda val: distance(val, self.end))
@@ -131,24 +133,38 @@ class Maze:
         self.dim = new_dim
         self.end = (self.dim - 1, self.dim - 1)
 
-    def route_astar(self, src, dest, search_path=False):
+    def route_astar(
+        self,
+        src,
+        dest,
+        search_path=False,
+        animate=False,
+        nodes=None,
+        node_from=None,
+        g_score=None,
+        f_score=None,
+    ):
         src = tuple(src)
         dest = tuple(dest)
-        nodes = set()
-        nodes.add(src)
+        if not nodes:
+            nodes = set()
+            nodes.add(src)
 
-        node_from = {}
+            node_from = {}
 
-        g_score = {src: 0}
+            g_score = {src: 0}
 
-        f_score = {src: distance(src, dest)}
+            f_score = {src: distance(src, dest)}
 
         while len(nodes) > 0:
             current = tuple(sorted(nodes, key=lambda x: f_score[x])[0])
             if current == dest:
+                if animate:
+                    self.grid[current[0]][current[1]] = 2
                 return True
 
             nodes.remove(current)
+            neighbors = set()
             if not search_path:
                 neighbors = self.get_neighbors(
                     current[0], current[1], exclude_path=True
@@ -164,6 +180,9 @@ class Maze:
                     f_score[neighbor] = route_score + distance(neighbor, dest)
                     if neighbor not in nodes:
                         nodes.add(neighbor)
+            if animate:
+                self.grid[current[0]][current[1]] = 2
+                return (nodes, node_from, g_score, f_score)
         return False
 
     def get_neighbors(self, row, col, exclude_path=False, only_path=False):

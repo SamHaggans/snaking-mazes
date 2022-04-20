@@ -34,6 +34,12 @@ class EditControl(QWidget):
         self.maze_drawer = maze_drawer
         self.maze = self.maze_drawer.maze
 
+        self.maze_name_label = QLabel("")
+        font = self.maze_name_label.font()
+        font.setPointSize(25)
+        self.maze_name_label.setFont(font)
+        self.maze_name_label.setWordWrap(True)
+
         self.random_button = QPushButton("Randomize Maze")
         self.random_button.setEnabled(False)
         self.random_button.pressed.connect(self.randomize_maze)
@@ -51,6 +57,8 @@ class EditControl(QWidget):
         self.maze_list = QComboBox()
         self.maze_list.addItems(Maze.saved_mazes.keys())
 
+        self.dimension_text = QLabel("Maze Size (x by x):")
+
         self.dimension_spin = QSpinBox()
         self.dimension_spin.setMinimum(5)
         self.dimension_spin.setMaximum(100)
@@ -67,6 +75,7 @@ class EditControl(QWidget):
         self.difficulty_dial.setSingleStep(1)
         self.difficulty_dial.valueChanged.connect(self.difficulty_change)
         self.difficulty_dial.setEnabled(False)
+        self.difficulty_dial.setMaximumWidth(100)
 
         self.difficulty_text = QLabel("Difficulty:")
 
@@ -75,15 +84,17 @@ class EditControl(QWidget):
         self.maze_name_edit.textEdited.connect(self.maze_name_change)
         self.maze_name_edit.setEnabled(False)
 
+        layout.addWidget(self.maze_name_label)
+        layout.addWidget(self.maze_name_edit)
         layout.addWidget(self.maze_list)
-        layout.addWidget(self.random_button)
         layout.addWidget(self.load_selected_button)
-        layout.addWidget(self.save_maze_button)
         layout.addWidget(self.new_maze_button)
+        layout.addWidget(self.save_maze_button)
+        layout.addWidget(self.random_button)
+        layout.addWidget(self.dimension_text)
         layout.addWidget(self.dimension_spin)
         layout.addWidget(self.difficulty_text)
         layout.addWidget(self.difficulty_dial)
-        layout.addWidget(self.maze_name_edit)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.setLayout(layout)
 
@@ -92,6 +103,7 @@ class EditControl(QWidget):
         self.maze_list.addItems(Maze.saved_mazes.keys())
         if not self.maze:
             return
+        self.maze_name_label.setText(f"Editing {self.maze.name}")
         self.save_maze_button.setEnabled(True)
         self.dimension_spin.setEnabled(True)
         self.difficulty_dial.setEnabled(True)
