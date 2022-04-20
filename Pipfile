@@ -12,6 +12,7 @@ black = "*"
 flake8 = "*"
 pre-commit = "*"
 isort = "*"
+pyinstaller = "*"
 
 [requires]
 python_version = "3.6"
