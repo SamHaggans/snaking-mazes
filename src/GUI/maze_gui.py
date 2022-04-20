@@ -32,6 +32,7 @@ class MazeGUI(QMainWindow):
         self.header = header_bar.HeaderBar(self.back_pressed, self.home_pressed, "")
 
         self.header.resize(self.width(), self.height() * 0.15)
+        self.active_widget_name = "home"
         self.active_widget = self.screens["home"]
         self.layout.addWidget(self.header)
         self.layout.addWidget(self.active_widget)
@@ -41,6 +42,7 @@ class MazeGUI(QMainWindow):
         self.active_widget.resize(self.width(), self.height() * 0.85)
 
     def set_active_screen(self, screen_name):
+        self.screen_history.appendleft(self.active_widget_name)
         if screen_name == "home":
             self.header.set_title("")
         if screen_name == "build":
@@ -54,9 +56,9 @@ class MazeGUI(QMainWindow):
         self.layout.removeWidget(self.active_widget)
         self.active_widget.setParent(None)
         self.active_widget = self.screens[screen_name]
-        self.layout.addWidget(self.active_widget)
+        self.active_widget_name = screen_name
 
-        self.screen_history.appendleft(screen_name)
+        self.layout.addWidget(self.active_widget)
 
     def update(self):
         super().update()
@@ -71,8 +73,9 @@ class MazeGUI(QMainWindow):
         self.update()
 
     def back_pressed(self):
-        self.screen_history.popleft()
-        self.set_active_screen(self.screen_history[-1])
+        if len(self.screen_history) >= 2:
+            self.set_active_screen(self.screen_history.popleft())
+            self.screen_history.popleft()
         self.update()
 
     def build_pressed(self):
