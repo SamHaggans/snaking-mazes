@@ -84,6 +84,10 @@ class EditControl(QWidget):
         self.maze_name_edit.textEdited.connect(self.maze_name_change)
         self.maze_name_edit.setEnabled(False)
 
+        self.help_button = QPushButton("Help")
+        self.help_button.pressed.connect(self.show_help)
+        self.help_button.setFixedSize(150, 40)
+
         layout.addWidget(self.maze_name_label)
         layout.addWidget(self.maze_name_edit)
         layout.addWidget(self.maze_list)
@@ -95,6 +99,7 @@ class EditControl(QWidget):
         layout.addWidget(self.dimension_spin)
         layout.addWidget(self.difficulty_text)
         layout.addWidget(self.difficulty_dial)
+        layout.addWidget(self.help_button)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.setLayout(layout)
 
@@ -187,10 +192,28 @@ class EditControl(QWidget):
         self.maze_drawer.modified = False
         self.update()
 
-    def make_popup(self, message):
+    def show_help(self):
+        help_message = (
+            "Instructions: \n"
+            "Edit the maze name by typing in the name box\n"
+            "Choose a preexisting maze to edit in the drop-down and load it with the "
+            "load button\n"
+            "Create a new maze with the new button\n"
+            "Save changes to the current maze with the save button\n"
+            "Randomize the current maze with the random button, which uses the "
+            "difficulty you set\n"
+            "Configure the maze dimension with the number selector\n"
+            "Change the difficulty by rotating the dial between the three "
+            "difficulties\n"
+            "Dragging/clicking the left mouse button places black borders on the maze\n"
+            "Dragging/clicking the right mouse button places path tiles on the maze\n"
+        )
+        self.make_popup(help_message, title="Help")
+
+    def make_popup(self, message, title="Alert"):
         popup = QMessageBox(self)
-        popup.setWindowTitle("Alert")
         popup.setText(message)
+        popup.setWindowTitle(title)
         ack = popup.exec()
 
         if ack:

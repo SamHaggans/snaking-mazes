@@ -106,6 +106,10 @@ class MazeDrawer(QWidget):
         col = int(y // self.grid_dim)
         if row < 0 or row >= self.maze.dim or col < 0 or col >= self.maze.dim:
             return
+        if self.mode == 0 and (
+            (row, col) == self.maze.end or (row, col) == self.maze.start
+        ):
+            return
         can_place = True
         if self.mode == 1 and self.maze.grid[row][col] == 1:
             return

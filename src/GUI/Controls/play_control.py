@@ -73,6 +73,10 @@ class PlayControl(QWidget):
         self.reset_play_button.pressed.connect(self.clear_timer)
         self.reset_play_button.setFixedSize(150, 40)
 
+        self.help_button = QPushButton("Help")
+        self.help_button.pressed.connect(self.show_help)
+        self.help_button.setFixedSize(150, 40)
+
         self.maze_drawer.set_draw_end_func(self.stop_play_timer)
 
         self.maze_list = QComboBox()
@@ -86,6 +90,7 @@ class PlayControl(QWidget):
         layout.addWidget(self.play_timer_label)
         layout.addWidget(self.play_button)
         layout.addWidget(self.reset_play_button)
+        layout.addWidget(self.help_button)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.setLayout(layout)
 
@@ -149,10 +154,25 @@ class PlayControl(QWidget):
         self.solving = False
         self.load_selected_maze()
 
-    def make_popup(self, message):
+    def show_help(self):
+        help_message = (
+            "Instructions: \n"
+            "Choose the maze you want to play from the drop-down menu and click the "
+            "load button\n"
+            "Use the left mouse button and click or drag to mark the maze path \n"
+            "You can remove parts of the path by clicking or dragging with the right "
+            "mouse button\n"
+            "You can watch an algorithm solve the maze by pressing the 'Watch Solver' "
+            "button\n"
+            "You can also set a timer for yourself (or the algorithm) to time the "
+            "solve \n"
+        )
+        self.make_popup(help_message, title="Help")
+
+    def make_popup(self, message, title="Alert"):
         popup = QMessageBox(self)
-        popup.setWindowTitle("Alert")
         popup.setText(message)
+        popup.setWindowTitle(title)
         ack = popup.exec()
 
         if ack:
