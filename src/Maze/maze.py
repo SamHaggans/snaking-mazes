@@ -102,7 +102,7 @@ class Maze:
                 self.grid[current[0]][current[1]] = 0
                 self.grid[new_visit[0]][new_visit[1]] = 0
 
-    def save_to_file(self, discard_old=False):
+    def save_to_file(self, discard_old=False, filename=None):
         if discard_old and self.name in Maze.saved_mazes:
             # Delete maze with same name
             os.remove(os.path.join(Maze.saved_mazes[self.name]))
@@ -112,7 +112,8 @@ class Maze:
             f"{self.name}{self.difficulty}{self.dim}{self.start[0] * self.end[1]}"
         )
         hashed = hashlib.md5(name_to_hash.encode())
-        filename = os.path.join(MAZE_SAVE_PATH, hashed.hexdigest() + ".maze")
+        if not filename:
+            filename = os.path.join(MAZE_SAVE_PATH, hashed.hexdigest() + ".maze")
         with open(filename, "wb") as file:
             pickle.dump(self, file)
         Maze.saved_mazes[self.name] = filename
