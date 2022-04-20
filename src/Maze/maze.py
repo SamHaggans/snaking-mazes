@@ -1,6 +1,9 @@
 import hashlib
+import math
 import os
 import pickle
+import random
+from collections import deque
 
 abspath = os.path.abspath(__file__)
 relpath = os.path.relpath(__file__)
@@ -47,6 +50,63 @@ class Maze:
         self.start = (0, 0)
         self.end = (dim - 1, dim - 1)
 
+    def randomize(self):
+        # Set everything to a wall
+        self.grid = [[1 for _ in range(self.dim)] for _ in range(self.dim)]
+
+        current = self.start
+        path_stack = deque()
+        while current != list(self.end):
+            neighbors = self.get_neighbors(current[0], current[1], exclude_path=True)
+            self.grid[current[0]][current[1]] = 0
+            if len(neighbors) == 0:
+                while not self.route_astar(current, self.end):
+                    self.grid[current[0]][current[1]] = 1
+                    current = path_stack.popleft()
+                neighbors = self.get_neighbors(
+                    current[0], current[1], exclude_path=True
+                )
+                neighbors = [
+                    neighbor
+                    for neighbor in neighbors
+                    if self.route_astar(neighbor, self.end)
+                ]
+                current = neighbors[0]
+
+            sorted_dist = sorted(neighbors, key=lambda val: distance(val, self.end))
+            if self.difficulty == 0:
+                threshold = 0.7
+            elif self.difficulty == 1:
+                threshold = 0.5
+            else:
+                threshold = 0.3
+            rd = random.random()
+            if rd < threshold or len(sorted_dist) == 1:
+                current = sorted_dist[0]
+            else:
+                current = random.choice(sorted_dist[1:])
+            path_stack.appendleft(current)
+        self.grid[self.end[0]][self.end[1]] = 0
+
+        while len(path_stack) != 0:
+            source = path_stack.popleft()
+            count = random.randint(
+                int((self.dim**2) * 0.5), int(((self.dim**2) * 0.8))
+            )
+            move_count = 0
+            while move_count < count:
+                new_neighbors = self.get_neighbors(
+                    source[0], source[1], exclude_path=True
+                )
+                if len(new_neighbors) == 0:
+                    break
+                source = random.choice(new_neighbors)
+                self.grid[source[0]][source[1]] = 0
+                move_count += 1
+            if len(path_stack) > int(self.dim * 0.05):
+                for _ in range(int(self.dim * 0.05)):
+                    path_stack.popleft()
+
     def save_to_file(self, discard_old=False):
         if discard_old and self.name in Maze.saved_mazes:
             # Delete maze with same name
@@ -76,6 +136,74 @@ class Maze:
         self.end = (min(new_dim - 1, self.end[0]), min(new_dim - 1, self.end[1]))
         self.grid = new_grid
         self.dim = new_dim
+        self.end = (self.dim - 1, self.dim - 1)
+
+    def route_astar(self, src, dest):
+        src = tuple(src)
+        dest = tuple(dest)
+        nodes = set()
+        nodes.add(src)
+
+        node_from = {}
+
+        g_score = {src: 0}
+
+        f_score = {src: distance(src, dest)}
+
+        while len(nodes) > 0:
+            current = tuple(sorted(nodes, key=lambda x: f_score[x])[0])
+            if current == dest:
+                return True
+
+            nodes.remove(current)
+
+            for neighbor in self.get_neighbors(
+                current[0], current[1], exclude_path=True
+            ):
+                neighbor = tuple(neighbor)
+                route_score = g_score[current] + 1
+                if neighbor not in g_score or route_score < g_score[neighbor]:
+                    node_from[neighbor] = current
+                    g_score[neighbor] = route_score
+                    f_score[neighbor] = route_score + distance(neighbor, dest)
+                    if neighbor not in nodes:
+                        nodes.add(neighbor)
+        return False
+
+    def get_neighbors(self, row, col, exclude_path=False):
+        neighbors = []
+        # 4 possible movements (no diagonals)
+        delta = ((-1, 0), (0, -1), (0, 1), (1, 0))
+
+        for d in delta:
+            if (
+                row + d[0] < self.dim
+                and row + d[0] >= 0
+                and col + d[1] < self.dim
+                and col + d[1] >= 0
+            ):
+                neighbors.append([row + d[0], col + d[1]])
+
+        if exclude_path:
+            actual_neighbors = []
+            for neighbor in neighbors:
+                neighbor_neighbors = self.get_neighbors(neighbor[0], neighbor[1])
+                valid_neighbor = True
+                for n in neighbor_neighbors:
+                    # For the neighbors of our neighbor, is any of it a path?
+                    # If so, our path cannot go through it
+                    if self.grid[n[0]][n[1]] == 0 and not (row == n[0] and col == n[1]):
+                        valid_neighbor = False
+                        break
+                if valid_neighbor and self.grid[neighbor[0]][neighbor[1]] != 0:
+                    actual_neighbors.append(neighbor)
+            neighbors = actual_neighbors
+
+        return neighbors
+
+
+def distance(a, b):
+    return math.sqrt((b[1] - a[1]) ** 2 + (b[0] - a[0]) ** 2)
 
 
 Maze.load_saved_mazes()

@@ -34,6 +34,11 @@ class EditControl(QWidget):
         self.maze_drawer = maze_drawer
         self.maze = self.maze_drawer.maze
 
+        self.random_button = QPushButton("Randomize Maze")
+        self.random_button.setEnabled(False)
+        self.random_button.pressed.connect(self.randomize_maze)
+        self.random_button.setFixedSize(150, 40)
+
         self.save_maze_button = QPushButton("Save Maze Changes")
         self.save_maze_button.setEnabled(False)
         self.save_maze_button.pressed.connect(self.save_maze)
@@ -71,6 +76,7 @@ class EditControl(QWidget):
         self.difficulty_dial.setEnabled(False)
 
         layout.addWidget(self.maze_list)
+        layout.addWidget(self.random_button)
         layout.addWidget(self.load_selected_button)
         layout.addWidget(self.save_maze_button)
         layout.addWidget(self.new_maze_button)
@@ -88,6 +94,7 @@ class EditControl(QWidget):
         self.dimension_spin.setEnabled(True)
         self.difficulty_dial.setEnabled(True)
         self.maze_name_edit.setEnabled(True)
+        self.random_button.setEnabled(True)
         self.save_maze_button.show()
 
         self.save_maze_button.setText(
@@ -125,6 +132,10 @@ class EditControl(QWidget):
             self.maze_changed = False
             self.maze_drawer.set_maze(self.maze)
             self.update()
+
+    def randomize_maze(self):
+        self.maze.randomize()
+        self.maze_drawer.update()
 
     def resize(self, width, height):
         self.setFixedSize(width, height)
