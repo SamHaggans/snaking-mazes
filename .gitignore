@@ -1,3 +1,6 @@
 .pytest_cache
 __pycache__
 .saved_mazes
+build
+dist
+main.spec
