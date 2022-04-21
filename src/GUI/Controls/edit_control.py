@@ -145,7 +145,6 @@ class EditControl(QWidget):
         self.dimension_spin.setValue(self.maze.dim)
         if self.maze.name in Maze.saved_mazes:
             self.maze_list.setCurrentText(self.maze.name)
-        self.maze_drawer.update()
         self.maze_drawer.repaint()
         self.maze_drawer.update()
 

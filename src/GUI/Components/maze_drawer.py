@@ -8,7 +8,6 @@ from PyQt6.QtWidgets import QMessageBox, QWidget
 class MazeDrawer(QWidget):
     def __init__(self):
         super().__init__()
-        self.show()
         self.maze = None
         self.left_pressed = False
         self.right_pressed = False
@@ -18,6 +17,7 @@ class MazeDrawer(QWidget):
         self.draw_end_func = None
         self.place_start = False
         self.place_end = False
+        self.show()
 
     def set_draw_end_func(self, func):
         self.draw_end_func = func
