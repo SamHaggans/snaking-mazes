@@ -145,6 +145,8 @@ class PlayControl(QWidget):
             self.maze_changed = False
             self.maze_drawer.set_maze(self.maze)
             self.update()
+            self.maze_drawer.update()
+            self.maze_drawer.repaint()
 
     def resize(self, width, height):
         self.setFixedSize(width, height)
@@ -215,4 +217,6 @@ class PlayControl(QWidget):
         else:
             # disable solver
             self.toggle_solver()
+            if self.play_timer_enabled:
+                self.toggle_play_timer()
         self.update()

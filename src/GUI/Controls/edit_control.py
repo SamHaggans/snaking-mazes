@@ -146,6 +146,8 @@ class EditControl(QWidget):
         if self.maze.name in Maze.saved_mazes:
             self.maze_list.setCurrentText(self.maze.name)
         self.maze_drawer.update()
+        self.maze_drawer.repaint()
+        self.maze_drawer.update()
 
     def save_maze(self):
         if not self.maze:
@@ -176,6 +178,8 @@ class EditControl(QWidget):
                 f"Difficulty: {self.difficulty_options[self.maze.difficulty]}"
             )
             self.difficulty_dial.setValue(self.maze.difficulty)
+            self.maze_drawer.update()
+            self.maze_drawer.repaint()
             self.update()
 
     def randomize_maze(self):
