@@ -2,13 +2,13 @@ from collections import deque
 
 from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget
 
-from .Controls import header_bar
+from .Components import header_bar
 from .Screens import build_screen, home_screen, play_screen, share_screen
 
 
 class MazeGUI(QMainWindow):
     """
-    Base GUI object, renders all GUI screens inside of it
+    Base GUI window, renders all GUI screens inside of it
     """
 
     def __init__(self):
