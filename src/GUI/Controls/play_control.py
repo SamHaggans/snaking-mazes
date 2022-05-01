@@ -14,10 +14,16 @@ from src.Maze.maze import Maze
 class PlayControl(QWidget):
     """
     Represents play controls
+    Extends QWidget
     """
 
     def __init__(self, maze_drawer):
+        """
+        Initialzes a PlayControl
+        @param maze_drawer: MazeDrawer to link to the controls
+        """
         super().__init__()
+        # Stores the state of the astar algorithm
         self.animation_state = {
             "nodes": None,
             "node_from": None,
@@ -107,7 +113,6 @@ class PlayControl(QWidget):
         if self.maze.name in Maze.saved_mazes:
             self.maze_list.setCurrentText(self.maze.name)
         self.maze_name_label.setFixedWidth(self.width())
-        self.maze_drawer.repaint()
         self.maze_drawer.update()
 
     def clear_timer(self):
@@ -146,7 +151,6 @@ class PlayControl(QWidget):
             self.maze_drawer.set_maze(self.maze)
             self.update()
             self.maze_drawer.update()
-            self.maze_drawer.repaint()
 
     def resize(self, width, height):
         self.setFixedSize(width, height)

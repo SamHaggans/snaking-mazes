@@ -5,9 +5,20 @@ from .screen import Screen
 
 
 class HomeScreen(Screen):
+    """
+    Main home screen of application
+    Extends Screen
+    """
+
     def __init__(
         self, play_button_callback, build_button_callback, share_button_callback
     ):
+        """
+        Initializes a HomeScreen
+        @param play_button_calback: Function to call when play is pressed
+        @param build_button_callback: Function to call when build is pressed
+        @param share_button_callback: Function to call when share is pressed
+        """
         super().__init__()
 
         title_widget = QLabel("Snaking Mazes")
