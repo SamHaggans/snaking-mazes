@@ -132,7 +132,9 @@ class Maze:
         self.end = (min(new_dim - 1, self.end[0]), min(new_dim - 1, self.end[1]))
         self.grid = new_grid
         self.dim = new_dim
-        self.end = (self.dim - 1, self.dim - 1)
+        # The start and the end must be open
+        self.grid[self.start[0]][self.start[1]] = 0
+        self.grid[self.end[0]][self.end[1]] = 0
 
     def route_astar(
         self,
