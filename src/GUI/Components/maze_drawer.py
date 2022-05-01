@@ -204,7 +204,7 @@ class MazeDrawer(QWidget):
         # If we're trying to draw a path, make sure it is connected to another path
         # otherwise it is invalid
         if val == 2:
-            neighbors = self.maze.get_neighbors(row, col)
+            neighbors = self.maze.get_neighbors(row, col, path=True)
             can_place = False
             for neighbor in neighbors:
                 if self.maze.grid[neighbor[0]][neighbor[1]] == 2:

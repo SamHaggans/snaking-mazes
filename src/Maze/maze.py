@@ -55,15 +55,13 @@ class Maze:
         current = self.start
         path_stack = deque()
         while current != tuple(self.end):
-            neighbors = self.get_neighbors(current[0], current[1], exclude_path=True)
+            neighbors = self.get_neighbors(current[0], current[1], path=False)
             self.grid[current[0]][current[1]] = 0
             if len(neighbors) == 0:
                 while not self.route_astar(current, self.end):
                     self.grid[current[0]][current[1]] = 1
                     current = path_stack.popleft()
-                neighbors = self.get_neighbors(
-                    current[0], current[1], exclude_path=True
-                )
+                neighbors = self.get_neighbors(current[0], current[1], path=False)
                 neighbors = [
                     neighbor
                     for neighbor in neighbors
@@ -92,9 +90,7 @@ class Maze:
         node_queue = path_stack
         while len(node_queue) != 0:
             current = node_queue.pop()
-            new_neighbors = self.get_neighbors(
-                current[0], current[1], exclude_path=True
-            )
+            new_neighbors = self.get_neighbors(current[0], current[1], path=False)
             for neighbor in new_neighbors:
                 node_queue.append(neighbor)
             if len(new_neighbors) > 0:
@@ -129,7 +125,10 @@ class Maze:
         # Start and end may now be invalid
         # Move them in if necessary
         self.start = (min(new_dim - 1, self.start[0]), min(new_dim - 1, self.start[1]))
-        self.end = (min(new_dim - 1, self.end[0]), min(new_dim - 1, self.end[1]))
+        if new_dim > self.dim:
+            self.end = (new_dim - 1, new_dim - 1)
+        else:
+            self.end = (min(new_dim - 1, self.end[0]), min(new_dim - 1, self.end[1]))
         self.grid = new_grid
         self.dim = new_dim
         # The start and the end must be open
@@ -168,12 +167,7 @@ class Maze:
 
             nodes.remove(current)
             neighbors = set()
-            if not search_path:
-                neighbors = self.get_neighbors(
-                    current[0], current[1], exclude_path=True
-                )
-            else:
-                neighbors = self.get_neighbors(current[0], current[1], only_path=True)
+            neighbors = self.get_neighbors(current[0], current[1], path=search_path)
             for neighbor in neighbors:
                 neighbor = tuple(neighbor)
                 route_score = g_score[current] + 1
@@ -188,7 +182,7 @@ class Maze:
                 return (nodes, node_from, g_score, f_score)
         return False
 
-    def get_neighbors(self, row, col, exclude_path=False, only_path=False):
+    def get_neighbors(self, row, col, path=False):
         neighbors = set()
         # 4 possible movements (no diagonals)
         delta = ((-1, 0), (0, -1), (0, 1), (1, 0))
@@ -200,24 +194,46 @@ class Maze:
                 and col + d[1] < self.dim
                 and col + d[1] >= 0
             ):
-                if not (only_path and self.grid[row + d[0]][col + d[1]] == 1):
-                    neighbors.add((row + d[0], col + d[1]))
+                neighbor = (row + d[0], col + d[1])
+                neighbor_value = self.grid[neighbor[0]][neighbor[1]]
+                if path:
+                    # If all we want is the path neighbors, just check for the ones
+                    # that are paths, meaning 0 or 2
+                    if neighbor_value == 0 or neighbor_value == 2:
+                        neighbors.add(neighbor)
+                else:
+                    # Otherwise, we are trying to avoid paths
+                    # This means that we are also avoiding nodes which neighbor paths
+                    # For example, finding neighbors of x where path is false
+                    # ...
+                    # 0 1 0 1
+                    # 0 x 1 1
+                    # 1 1 1 1
+                    # 1 1 1 1
+                    # ...
+                    # Here, the node to the direct right is invalid, because
+                    # creating a path there would connect to the path in the top right
+                    # and as such create unintended paths
+                    # The only valid neighbor here is the node directly below the x
+                    # To check for this, we need to check if there are path neighbors
+                    # of our prospective neighbor i.e. checking neighbors one level down
 
-        if exclude_path:
-            actual_neighbors = set()
-            for neighbor in neighbors:
-                neighbor_neighbors = self.get_neighbors(neighbor[0], neighbor[1])
-                valid_neighbor = True
-                for n in neighbor_neighbors:
-                    # For the neighbors of our neighbor, is any of it a path?
-                    # If so, our path cannot go through it
-                    if self.grid[n[0]][n[1]] == 0 and not (row == n[0] and col == n[1]):
-                        valid_neighbor = False
-                        break
-                if valid_neighbor and self.grid[neighbor[0]][neighbor[1]] != 0:
-                    actual_neighbors.add(neighbor)
-            neighbors = actual_neighbors
-
+                    # Fetch neighbors of our neighbor
+                    path_neighbors_of_neighbor = self.get_neighbors(
+                        neighbor[0], neighbor[1], path=True
+                    )
+                    # However, it is ok (necessary even) that it borders the current
+                    # node we are searching from (the x in the example above)
+                    # filter that one out so that it doesn't make the neighbor invalid
+                    path_neighbors_of_neighbor = set(
+                        filter(
+                            lambda node: node != (row, col), path_neighbors_of_neighbor
+                        )
+                    )
+                    # We should have no neighbors that are paths and the node itself
+                    # should not be a path as well. If both met, add it.
+                    if len(path_neighbors_of_neighbor) == 0 and neighbor_value == 1:
+                        neighbors.add(neighbor)
         return neighbors
 
 
