@@ -32,8 +32,10 @@ class PlayControl(QWidget):
         }
 
         layout = QVBoxLayout()
+        # Whether or not we are currently solving the maze
         self.solving = False
 
+        # Creates a timer to run ticks on our animation
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.run_animation_tick)
 
@@ -66,6 +68,8 @@ class PlayControl(QWidget):
         self.play_timer_label = QLabel("0.0")
         self.play_timer_label.setFont(font)
 
+        # Timer for the physical viewable timer
+        # Separate from the timer that controls the animation ticks
         self.play_timer = QTimer()
         self.play_timer.timeout.connect(self.update_time)
 
@@ -88,6 +92,7 @@ class PlayControl(QWidget):
         self.maze_list = QComboBox()
         self.maze_list.addItems(Maze.saved_mazes.keys())
 
+        # Load all of the above widgets into the layout
         layout.addWidget(self.maze_name_label)
         layout.addWidget(self.maze_list)
         layout.addWidget(self.load_selected_button)
@@ -101,11 +106,16 @@ class PlayControl(QWidget):
         self.setLayout(layout)
 
     def update(self):
+        """
+        Updates the play control and all sub-widgets
+        """
+        # Load the saved mazes
         Maze.load_saved_mazes()
         self.maze_list.clear()
         self.maze_list.addItems(Maze.saved_mazes.keys())
         if not self.maze:
             return
+        # Once we have a maze, enable maze widgets
         self.clear_maze_button.setEnabled(True)
         self.animate_solve_button.setEnabled(True)
         self.play_button.setEnabled(True)
@@ -116,16 +126,25 @@ class PlayControl(QWidget):
         self.maze_drawer.update()
 
     def clear_timer(self):
+        """
+        Clears the play timer
+        """
         if self.play_timer_enabled:
             self.toggle_play_timer()
         self.elapsed_time = 0.0
         self.play_timer_label.setText(str(self.elapsed_time))
 
     def stop_play_timer(self):
+        """
+        Stops the maze timer
+        """
         if self.play_timer_enabled:
             self.toggle_play_timer()
 
     def toggle_play_timer(self):
+        """
+        Toggles the play timer between on and off
+        """
         if not self.play_timer_enabled:
             self.play_button.setText("Stop Timer")
             self.elapsed_time = 0.0
@@ -137,11 +156,17 @@ class PlayControl(QWidget):
         self.play_timer_enabled = not self.play_timer_enabled
 
     def update_time(self):
+        """
+        Adds time to the timer to indicate that a tick happened
+        """
         self.elapsed_time += 0.1
         self.elapsed_time = round(self.elapsed_time, 1)
         self.play_timer_label.setText(str(self.elapsed_time))
 
     def load_selected_maze(self):
+        """
+        Triggered when the load maze button is pressed
+        """
         if len(Maze.saved_mazes) == 0:
             self.make_popup("No saved mazes!")
         else:
@@ -150,17 +175,29 @@ class PlayControl(QWidget):
             self.maze_changed = False
             self.maze_drawer.set_maze(self.maze)
             self.update()
-            self.maze_drawer.update()
 
     def resize(self, width, height):
+        """
+        Resizes to a new width and height
+        @param width: new width in pixels
+        @param height: new height in pixels
+        """
         self.setFixedSize(width, height)
         self.update()
 
     def clear_maze(self):
+        """
+        Clears the paths we have drawn on the maze
+        """
+        # We can clear the maze by just reloading it from the file
+        # We never save drawn paths to a file so this is a good copy
         self.solving = False
         self.load_selected_maze()
 
     def show_help(self):
+        """
+        Creates pop-up help menu when help button is pressed
+        """
         help_message = (
             "Instructions: \n"
             "Choose the maze you want to play from the drop-down menu and click the "
@@ -176,6 +213,11 @@ class PlayControl(QWidget):
         self.make_popup(help_message, title="Help")
 
     def make_popup(self, message, title="Alert"):
+        """
+        Creates a pop-up window with a given text
+        @param message: Main message to display in the pop-up
+        @param title: Title to give to pop-up window, default 'Alert'
+        """
         popup = QMessageBox(self)
         popup.setText(message)
         popup.setWindowTitle(title)
@@ -185,15 +227,18 @@ class PlayControl(QWidget):
             return
 
     def toggle_solver(self):
+        """
+        Toggles whether or not we are manually solving the maze
+        """
         if not self.solving:
             self.clear_maze()
             self.animate_solve_button.setText("Stop Solver")
             self.timer.start(int(50 * (10 / self.maze.dim)))
             self.animation_state = {
-                "nodes": None,
-                "node_from": None,
-                "g_score": None,
-                "f_score": None,
+                "nodes": set(),
+                "node_from": dict(),
+                "g_score": dict(),
+                "f_score": dict(),
             }
         else:
             self.timer.stop()
@@ -201,25 +246,20 @@ class PlayControl(QWidget):
         self.solving = not self.solving
 
     def run_animation_tick(self):
+        """
+        Run one animation tick on the solver algorith, which draws one additional node
+        """
+        # We run one iteration of astar on the maze
         result = self.maze.route_astar(
             self.maze.start,
             self.maze.end,
-            animate=True,
             search_path=True,
-            nodes=self.animation_state["nodes"],
-            node_from=self.animation_state["node_from"],
-            g_score=self.animation_state["g_score"],
-            f_score=self.animation_state["f_score"],
+            animate=True,
+            state=self.animation_state,
         )
-        if type(result) == tuple:
-            self.animation_state = {
-                "nodes": result[0],
-                "node_from": result[1],
-                "g_score": result[2],
-                "f_score": result[3],
-            }
-        else:
-            # disable solver
+        if result:
+            # animation result True = Win
+            # Disable solver
             self.toggle_solver()
             if self.play_timer_enabled:
                 self.toggle_play_timer()
