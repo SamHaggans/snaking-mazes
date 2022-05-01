@@ -46,6 +46,3 @@ class HomeScreen(Screen):
         layout.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
         layout.addStretch()
         self.setLayout(layout)
-
-    def resize(self, width, height):
-        self.setFixedSize(width, height)

@@ -20,6 +20,6 @@ class PlayScreen(Screen):
         self.maze = None
 
     def resize(self, width, height):
-        self.setFixedSize(width, height)
+        super().resize(width, height)
         self.maze_drawer.resize(self.width() * 0.7, 0.9 * self.height())
         self.play_sidebar.resize(self.width() * 0.3, self.height())

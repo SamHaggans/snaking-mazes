@@ -72,10 +72,6 @@ class ShareScreen(Screen):
             except Exception:
                 self.make_popup("Something went wrong saving that file.")
 
-    def resize(self, width, height):
-        self.setFixedSize(width, height)
-        self.update()
-
     def update(
         self,
     ):
