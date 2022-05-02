@@ -131,6 +131,8 @@ class PlayControl(QWidget):
         """
         if self.play_timer_enabled:
             self.toggle_play_timer()
+        if self.solving:
+            self.toggle_solver()
         self.elapsed_time = 0.0
         self.play_timer_label.setText(str(self.elapsed_time))
 
@@ -170,6 +172,9 @@ class PlayControl(QWidget):
         if len(Maze.saved_mazes) == 0:
             self.make_popup("No saved mazes!")
         else:
+            if self.solving:
+                self.toggle_solver()
+                self.solving = False
             maze_selected = self.maze_list.currentText()
             self.maze = Maze.get_saved_maze(maze_selected)
             self.maze_changed = False
@@ -191,7 +196,6 @@ class PlayControl(QWidget):
         """
         # We can clear the maze by just reloading it from the file
         # We never save drawn paths to a file so this is a good copy
-        self.solving = False
         self.load_selected_maze()
 
     def show_help(self):
