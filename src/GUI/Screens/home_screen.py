@@ -37,7 +37,9 @@ class HomeScreen(Screen):
             Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
         )
 
-        play_button = QPushButton("Play Mazes")
+        # We need this button to be accessible for a test
+        self.play_button = QPushButton("Play Mazes")
+        play_button = self.play_button
         play_button.pressed.connect(play_button_callback)
         play_button.setFixedHeight(40)
 

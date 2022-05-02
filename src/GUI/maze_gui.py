@@ -9,10 +9,13 @@ from .Screens import build_screen, home_screen, play_screen, share_screen
 class MazeGUI(QMainWindow):
     """
     Base GUI window, renders all GUI screens inside of it
+    @param hidden: Default false, tells the window to stay hidden (for testing)
     """
 
-    def __init__(self):
+    def __init__(self, hidden=False):
         super().__init__()
+        if hidden:
+            self.hide()
         self.setWindowTitle("Snaking Mazes")
         self.setMinimumSize(1000, 750)
         self.main_widget = QWidget(self)
