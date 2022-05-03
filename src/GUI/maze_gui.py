@@ -60,6 +60,7 @@ class MazeGUI(QMainWindow):
         self.active_widget.setParent(None)
         self.active_widget = self.screens[screen_name]
         self.active_widget_name = screen_name
+        self.active_widget.update()
 
         self.layout.addWidget(self.active_widget)
 
