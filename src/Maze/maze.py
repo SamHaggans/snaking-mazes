@@ -79,6 +79,10 @@ class Maze:
             # Find non-path valid neighbors
             neighbors = self.get_neighbors(current[0], current[1], path=False)
             self.grid[current[0]][current[1]] = 0
+            if self.end in neighbors:
+                # If we're at the end, make sure we go to it
+                path_stack.appendleft(current)
+                break
             # If we have no neighbors we can go to, we need to backtrack
             if len(neighbors) == 0:
                 # Wait until we get back to some node where we can get to the end
